@@ -49,6 +49,11 @@ jobs:
           SLACK_TITLE: "Infrastructure Pipeline Status: STARTED"
           SLACK_MESSAGE: "🚀 Triggered native Terraform Cloud remote run execution."
 
+      # --- DEBUG GITHUB OIDC CLAIMS ---
+      - name: Debug OIDC Claims
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: github/actions-oidc-debugger@main    
+
       # GitHub OIDC provides short-lived AWS credentials for runner-side AWS operations.
       # Terraform plan/apply still execute in HCP Terraform, which should use HCP
       # Terraform dynamic AWS provider credentials configured on the workspace.
