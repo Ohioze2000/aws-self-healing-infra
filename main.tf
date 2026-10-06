@@ -147,13 +147,13 @@ resource "aws_route53_record" "www_aaaa" {
 # ==============================================================================
 
 module "alb" {
-  source          = "./modules/alb"
-  env_prefix      = var.env_prefix
-  vpc_id          = module.network.vpc_id
-  subnet_ids      = module.network.public_subnet_ids
+  source              = "./modules/alb"
+  env_prefix          = var.env_prefix
+  vpc_id              = module.network.vpc_id
+  subnet_ids          = module.network.public_subnet_ids
   certificate_arn     = module.ssl.certificate_arn
   deletion_protection = var.alb_deletion_protection
-  tags                   = local.common_tags
+  tags                = local.common_tags
 
   depends_on = [
     aws_acm_certificate_validation.cert_validation
@@ -175,22 +175,22 @@ module "iam" {
 # ==============================================================================
 
 module "webserver" {
-  source                    = "./modules/webserver"
-  env_prefix                = var.env_prefix
-  vpc_id                    = module.network.vpc_id
-  private_subnet_ids        = module.network.private_subnet_ids
-  alb_security_group_id     = module.alb.alb_security_group_id
-  target_group_arn          = module.alb.target_group_arn
-  iam_instance_profile_name = module.iam.iam_instance_profile_name
-  instance_type             = var.instance_type
-  image_name                = var.image_name
-  public_key_content        = var.public_key_content
-  app_archive_url           = var.app_archive_url
+  source                          = "./modules/webserver"
+  env_prefix                      = var.env_prefix
+  vpc_id                          = module.network.vpc_id
+  private_subnet_ids              = module.network.private_subnet_ids
+  alb_security_group_id           = module.alb.alb_security_group_id
+  target_group_arn                = module.alb.target_group_arn
+  iam_instance_profile_name       = module.iam.iam_instance_profile_name
+  instance_type                   = var.instance_type
+  image_name                      = var.image_name
+  public_key_content              = var.public_key_content
+  app_archive_url                 = var.app_archive_url
   cloudwatch_agent_parameter_name = var.cloudwatch_agent_parameter_name
-  desired_capacity          = var.desired_capacity
-  min_size                  = var.min_size
-  max_size                  = var.max_size
-  tags                      = local.common_tags
+  desired_capacity                = var.desired_capacity
+  min_size                        = var.min_size
+  max_size                        = var.max_size
+  tags                            = local.common_tags
 }
 
 # ==============================================================================
@@ -198,16 +198,16 @@ module "webserver" {
 # ==============================================================================
 
 module "monitoring" {
-  source           = "./modules/monitoring"
-  env_prefix       = var.env_prefix
-  asg_name         = module.webserver.asg_name
-  target_group_arn = module.alb.target_group_arn
-  alb_arn_suffix   = module.alb.alb_arn_suffix
-  slack_webhook_url  = var.slack_webhook_url
-  alert_email        = var.alert_email
-  app_log_group_name              = "/ec2/app-logs"
-  cloudwatch_agent_parameter_name = var.cloudwatch_agent_parameter_name
-  remediation_max_capacity        = var.remediation_max_capacity
+  source                                 = "./modules/monitoring"
+  env_prefix                             = var.env_prefix
+  asg_name                               = module.webserver.asg_name
+  target_group_arn                       = module.alb.target_group_arn
+  alb_arn_suffix                         = module.alb.alb_arn_suffix
+  slack_webhook_url                      = var.slack_webhook_url
+  alert_email                            = var.alert_email
+  app_log_group_name                     = "/ec2/app-logs"
+  cloudwatch_agent_parameter_name        = var.cloudwatch_agent_parameter_name
+  remediation_max_capacity               = var.remediation_max_capacity
   remediation_verification_delay_seconds = var.remediation_verification_delay_seconds
 
   tags = local.common_tags
