@@ -1,4 +1,3 @@
-#
 name: "Terraform AWS Deploy"
 
 on:
@@ -50,9 +49,28 @@ jobs:
           SLACK_MESSAGE: "🚀 Triggered native Terraform Cloud remote run execution."
 
       # --- DEBUG GITHUB OIDC CLAIMS ---
-      - name: Debug OIDC Claims
+      - name: Inspect OIDC Claims
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: github/actions-oidc-debugger@main    
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          OIDC_TOKEN=$(curl -sSf \
+            -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=sts.amazonaws.com" \
+            | jq -r '.value')
+
+          echo "OIDC token retrieved successfully."
+
+          echo "$OIDC_TOKEN" | cut -d '.' -f 2 | base64 -d 2>/dev/null | jq '{
+            iss,
+            aud,
+            sub,
+            repository,
+            repository_owner,
+            ref,
+            event_name
+          }'  
 
       # GitHub OIDC provides short-lived AWS credentials for runner-side AWS operations.
       # Terraform plan/apply still execute in HCP Terraform, which should use HCP
