@@ -1,0 +1,77 @@
+name: "Infrastructure Cleanup"
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: "Type DESTROY to confirm production infrastructure teardown"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  TF_CLOUD_ORGANIZATION: "DigitalTech"
+  TF_WORKSPACE: "awsSelfHealingInfra"
+  AWS_REGION: "us-east-1"
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+concurrency:
+  group: terraform-${{ env.TF_WORKSPACE }}
+  cancel-in-progress: false
+
+jobs:
+  terraform-destroy:
+    name: "Controlled Infrastructure Teardown"
+    if: github.event.inputs.confirm_destroy == 'DESTROY'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Slack Notification - Teardown Started
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: '#FF9900'
+          SLACK_MESSAGE: "⚠️ Controlled infrastructure teardown started by ${{ github.actor }}."
+          SLACK_TITLE: "Infrastructure Teardown Status: STARTED"
+
+      - run: terraform init
+
+      - name: Terraform Destroy Plan
+        env:
+          TF_VAR_alb_deletion_protection: "false"
+        run: terraform plan -destroy -out=destroy.tfplan
+
+      - name: Terraform Destroy Apply
+        env:
+          TF_VAR_alb_deletion_protection: "false"
+        run: terraform apply -auto-approve destroy.tfplan
+
+      - name: Slack Notification - Destruction Complete
+        if: success()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: '#FF9900'
+          SLACK_TITLE: "⚠️ INFRASTRUCTURE DESTROYED"
+          SLACK_MESSAGE: |
+            Infrastructure teardown completed successfully.
+            Environment: Production
+            Triggered By: ${{ github.actor }}
+
+      - name: Slack Notification - Destruction Failed
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_COLOR: 'danger'
+          SLACK_TITLE: "🚨 DESTROY FAILED"
+          SLACK_MESSAGE: |
+            Terraform was unable to fully destroy the resources.
+            Inspect the workflow and AWS console for remaining resources.
