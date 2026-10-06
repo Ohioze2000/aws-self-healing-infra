@@ -67,6 +67,11 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Inspect Terraform Environment
+        run: |
+          terraform version
+          terraform providers  
+
       # --- SYNTAX & FORMATTING QUALITY GATES ---
       - name: Terraform Format Check
         run: terraform fmt -check
