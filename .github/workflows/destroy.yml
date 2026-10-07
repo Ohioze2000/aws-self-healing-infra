@@ -41,6 +41,18 @@ jobs:
           SLACK_MESSAGE: "⚠️ Controlled infrastructure teardown started by ${{ github.actor }}."
           SLACK_TITLE: "Infrastructure Teardown Status: STARTED"
 
+      - name: Configure AWS Credentials (OIDC)
+        #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: GitHubActions-${{ github.run_id }}
+
+      - name: Verify AWS OIDC Identity
+        #if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: aws sts get-caller-identity   
+
       - run: terraform init
 
       - name: Terraform Destroy Plan
