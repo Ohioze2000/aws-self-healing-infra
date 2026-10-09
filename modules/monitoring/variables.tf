@@ -96,7 +96,6 @@ variable "enable_log_error_alarm" {
 variable "cloudwatch_agent_parameter_name" {
   type        = string
   description = "SSM Parameter Store name containing the CloudWatch Agent configuration"
-  default     = "/asg-webserver/cloudwatch-agent-config"
 }
 
 variable "app_log_group_name" {

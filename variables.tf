@@ -36,7 +36,7 @@ variable "create_www_record" {
 variable "alb_deletion_protection" {
   type        = bool
   description = "Protect the production ALB from accidental deletion. Disable explicitly for intentional teardown."
-  default     = true
+  default     = false
 }
 
 variable "enable_ipv6" {
@@ -63,7 +63,6 @@ variable "app_archive_url" {
 variable "cloudwatch_agent_parameter_name" {
   type        = string
   description = "SSM Parameter Store name containing the CloudWatch Agent configuration"
-  default     = "/asg-webserver/cloudwatch-agent-config"
 }
 
 variable "public_key_content" {
