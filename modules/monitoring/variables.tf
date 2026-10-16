@@ -40,7 +40,7 @@ variable "sns_kms_key_id" {
 variable "cpu_alarm_threshold" {
   type        = number
   description = "Average CPU threshold percent to trigger alarm"
-  default     = 80
+  default     = 70
 }
 
 variable "cpu_evaluation_periods" {
@@ -58,7 +58,7 @@ variable "cpu_datapoints_to_alarm" {
 variable "cpu_alarm_period" {
   type        = number
   description = "The period in seconds over which the specified statistic is applied"
-  default     = 300
+  default     = 120
 }
 
 # --- Disk Alarm Variables ---
@@ -71,7 +71,7 @@ variable "enable_disk_alarm" {
 variable "disk_alarm_threshold" {
   type        = number
   description = "Root disk usage threshold percentage to trigger alarm"
-  default     = 70
+  default     = 80
 }
 
 variable "disk_evaluation_periods" {
@@ -161,7 +161,7 @@ variable "memory_datapoints_to_alarm" {
 variable "memory_alarm_period" {
   type        = number
   description = "Period in seconds for memory alarm evaluation"
-  default     = 300
+  default     = 120
 }
 
 variable "remediation_max_capacity" {
